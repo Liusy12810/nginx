@@ -14,11 +14,17 @@ ngx_array_create(ngx_pool_t *p, ngx_uint_t n, size_t size)
 {
     ngx_array_t *a;
 
+    /*
+     * 先给数组数据结构分配内存空间，在内存池上
+     */
     a = ngx_palloc(p, sizeof(ngx_array_t));
     if (a == NULL) {
         return NULL;
     }
 
+    /*
+     * 给数组元素分配内存
+     */
     if (ngx_array_init(a, p, n, size) != NGX_OK) {
         return NULL;
     }
@@ -33,7 +39,15 @@ ngx_array_destroy(ngx_array_t *a)
     ngx_pool_t  *p;
 
     p = a->pool;
+    /* hint:
+     ! 这里有一个有趣的细节，nginx默认array是分配在小内存`p->d`上的
+     ! 也就是说，如果有一个array出现在了`p->large`上，那么就有可能bug
+     ! 不过程序的其它部分保障了数组不会存储过于大量的数据。
+     */
 
+    /*
+     *
+     */
     if ((u_char *) a->elts + a->size * a->nalloc == p->d.last) {
         p->d.last -= a->size * a->nalloc;
     }
