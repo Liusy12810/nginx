@@ -46,7 +46,10 @@ ngx_array_destroy(ngx_array_t *a)
      */
 
     /*
-     *
+     * 清理数组元素所在的内存
+     * 如果数组的末尾和内存池的可用内存的开始相同
+     * 则将可用内存的开始设为数组元素的开始
+     * 
      */
     if ((u_char *) a->elts + a->size * a->nalloc == p->d.last) {
         p->d.last -= a->size * a->nalloc;

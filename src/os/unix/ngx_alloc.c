@@ -13,13 +13,18 @@ ngx_uint_t  ngx_pagesize;
 ngx_uint_t  ngx_pagesize_shift;
 ngx_uint_t  ngx_cacheline_size;
 
-
+/* *
+ * 封装了内存分配 malloc 同时增加了日志功能
+ * 就很简单的分配一个size大小的内存，然后
+ */
 void *
 ngx_alloc(size_t size, ngx_log_t *log)
 {
     void  *p;
 
     p = malloc(size);
+    //* 分配失败的情况
+    //* 增加一行日志记录
     if (p == NULL) {
         ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
                       "malloc(%uz) failed", size);
@@ -30,7 +35,10 @@ ngx_alloc(size_t size, ngx_log_t *log)
     return p;
 }
 
-
+/* *
+ * 分配内存，分配成功后全部设为 0
+ * 再次封装 ngx_alloc
+ */
 void *
 ngx_calloc(size_t size, ngx_log_t *log)
 {

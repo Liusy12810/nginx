@@ -27,44 +27,55 @@
               NGX_POOL_ALIGNMENT)
 
 
-typedef void (*ngx_pool_cleanup_pt)(void *data);
+typedef void (*ngx_pool_cleanup_pt)(void *data);  //* 清理函数类型别名 
 
-typedef struct ngx_pool_cleanup_s  ngx_pool_cleanup_t;
+//* 待清理内存块类型 
+typedef struct ngx_pool_cleanup_s  ngx_pool_cleanup_t; 
 
+//* 自定义清理回调的内存块的类型 
 struct ngx_pool_cleanup_s {
-    ngx_pool_cleanup_pt   handler;
-    void                 *data;
-    ngx_pool_cleanup_t   *next;
+    ngx_pool_cleanup_pt   handler;  //* 内存块清理函数 
+    void                 *data;     //* 内存数据 
+    ngx_pool_cleanup_t   *next;     //* 下一个待清理的内存 
 };
 
 
+//* 大内存块类型 
 typedef struct ngx_pool_large_s  ngx_pool_large_t;
 
+//* 大内存块类型 
 struct ngx_pool_large_s {
-    ngx_pool_large_t     *next;
-    void                 *alloc;
+    ngx_pool_large_t     *next;     //* 下一个大内存快地址 
+    void                 *alloc;    //* 指向大内存块数据 
 };
 
-
+/* *
+ * 小块内存池 
+ * 虽然 next 的类型是 ngx_pool_t，但是实际使用的时候，只会使用到其中的 pool->d 也就是小内存的区域。
+ * 主要是为了保证结构，pool_data_t 没有保存其中的内存块大小等信息
+ */
 typedef struct {
-    u_char               *last;
-    u_char               *end;
-    ngx_pool_t           *next;
-    ngx_uint_t            failed;
+    u_char               *last;     //* 已使用内存块末位地址 
+    u_char               *end;      //* 内存池末位地址 
+    ngx_pool_t           *next;     //* 下一个内存池地址
+    ngx_uint_t            failed;   //* 失败次数 
 } ngx_pool_data_t;
 
-
+/* *
+ * Nginx内存池数据结构
+ * 储存内存池所有信息
+ */
 struct ngx_pool_s {
-    ngx_pool_data_t       d;
-    size_t                max;
-    ngx_pool_t           *current;
-    ngx_chain_t          *chain;
-    ngx_pool_large_t     *large;
-    ngx_pool_cleanup_t   *cleanup;
-    ngx_log_t            *log;
+    ngx_pool_data_t       d;        //* 内存数据，标记内存块开始、结尾、以及下一个内存池地址 
+    size_t                max;      //* 小内存池最大大小
+    ngx_pool_t           *current;  //* 自引用结构，指向自身地址 
+    ngx_chain_t          *chain;    // ? 缓冲区链表，不知道干嘛的
+    ngx_pool_large_t     *large;    //* 大内存块链表 
+    ngx_pool_cleanup_t   *cleanup;  //* 自定义清理回调的数据类型链表 
+    ngx_log_t            *log;      //* 日志文件
 };
 
-
+//* 自定义清理回调文件类型 
 typedef struct {
     ngx_fd_t              fd;
     u_char               *name;

@@ -15,11 +15,19 @@ static void *ngx_palloc_block(ngx_pool_t *pool, size_t size);
 static void *ngx_palloc_large(ngx_pool_t *pool, size_t size);
 
 
+/* *
+ * 创建新的内存池，直接创建内存池，
+ */
 ngx_pool_t *
 ngx_create_pool(size_t size, ngx_log_t *log)
 {
+    //* 声明一个 ngx_pool_t 类型的指针，用以保存分配的地址
     ngx_pool_t  *p;
 
+    /* *
+     * 为指针 p 分配内存
+     * 如果为空则直接返回
+     */
     p = ngx_memalign(NGX_POOL_ALIGNMENT, size, log);
     if (p == NULL) {
         return NULL;
@@ -118,7 +126,12 @@ ngx_reset_pool(ngx_pool_t *pool)
     pool->large = NULL;
 }
 
-
+/* *
+ * 在内存池中分配内存
+ * 小于 pool->max 的直接分配在内存池里
+ * 大于 pool->max 则分配在大内存链表上
+ * 非常地简单
+ */
 void *
 ngx_palloc(ngx_pool_t *pool, size_t size)
 {
@@ -132,6 +145,12 @@ ngx_palloc(ngx_pool_t *pool, size_t size)
 }
 
 
+/* *
+ * 和上面的一样在内存池中分配内存，但是不会进行内存对齐
+ * 小于 pool->max 的直接分配在内存池里
+ * 大于 pool->max 则分配在大内存链表上
+ * 效率高些？不知道
+ */
 void *
 ngx_pnalloc(ngx_pool_t *pool, size_t size)
 {

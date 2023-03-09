@@ -32,6 +32,7 @@ void *ngx_memalign(size_t alignment, size_t size, ngx_log_t *log);
 
 #else
 
+// * memalign 只不过是一个对 allic 的再封装罢了，不过在某些情况下似乎有别的定义？
 #define ngx_memalign(alignment, size, log)  ngx_alloc(size, log)
 
 #endif
